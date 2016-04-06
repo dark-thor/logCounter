@@ -1,5 +1,8 @@
 package org.tumblr;
 
+import com.google.common.collect.ConcurrentHashMultiset;
+import com.google.common.collect.Multiset;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
@@ -13,15 +16,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum LogCounter {
     LOG_COUNTER; // Singleton class
 
-    private static Map<Integer, Map<Long,Integer>> statusMap= new ConcurrentHashMap<>();
+    private static Map<Integer, Multiset<Long>> statusMap= new ConcurrentHashMap<>();
+
 
     /*
        @param l: date represented as long yyyyMMddHHmm
        @param statusCode: HTTP status code from access log
      */
     public void increment(Long dt, Integer statusCode) {
-        statusMap.putIfAbsent(statusCode, new ConcurrentHashMap<>());
-        statusMap.get(statusCode).compute(dt, (k, v) -> v == null ? 1 : v+1);
+        statusMap.putIfAbsent(statusCode, ConcurrentHashMultiset.create());
+        statusMap.get(statusCode).add(dt);
     }
 
     /*
@@ -40,14 +44,15 @@ public enum LogCounter {
 
         for (Integer statusCode : sortedKeys) {
             List<Long> sortedDateKeys = new ArrayList<>(statusMap.size());
-            Map<Long, Integer> countMap = statusMap.get(statusCode);
-            sortedDateKeys.addAll(countMap.keySet());
+
+            Multiset<Long> countMap = statusMap.get(statusCode);
+            sortedDateKeys.addAll(countMap.elementSet());
             Collections.sort(sortedDateKeys);
 
             fileWriter.write("# time, " + statusCode + "\n");
             for (Long l : sortedDateKeys) {
                 try {
-                    fileWriter.write(outputDateFormat.format(inputDateFormat.parse(l.toString())) + ", " + countMap.get(l) + "\n");
+                    fileWriter.write(outputDateFormat.format(inputDateFormat.parse(l.toString())) + ", " + countMap.count(l) + "\n");
                 } catch (ParseException e) {
                     fileWriter.close();
                     e.printStackTrace();
