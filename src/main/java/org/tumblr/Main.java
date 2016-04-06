@@ -19,6 +19,7 @@ public class Main {
     private static final String OUTPUT_FILENAME = "output.csv";
 
     public static void main(String[] args) throws Exception {
+        long mainStart = System.currentTimeMillis();
         if (args.length != 1) {
             throw new RuntimeException("Pass the logs directory");
         }
@@ -39,6 +40,8 @@ public class Main {
         try {
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             LogCounter.LOG_COUNTER.printResult(OUTPUT_FILENAME);
+            long mainEnd = System.currentTimeMillis();
+            System.out.println("Execution time (ms): " + (mainEnd - mainStart));
         } catch (InterruptedException e) {
 
         }
