@@ -1,7 +1,7 @@
 group 'org.tumblr'
 version '1.0-SNAPSHOT'
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 sourceCompatibility = 1.8
 
@@ -10,14 +10,21 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.guava:guava:19.0'
-    compile 'commons-io:commons-io:2.4'
-    testCompile 'junit:junit:4.11'
+    implementation 'com.google.guava:guava:19.0'
+    implementation 'commons-io:commons-io:2.4'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     from {
-        (configurations.runtime).collect {
+        (configurations.runtimeClasspath).collect {
             it.isDirectory() ? it : zipTree(it)
         }
     }

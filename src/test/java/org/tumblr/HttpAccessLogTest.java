@@ -1,7 +1,7 @@
 package org.tumblr;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by thor on 5/4/16.
